@@ -18,6 +18,16 @@ publishing {
             from components.java
         }
     }
+    repositories {
+        maven {
+            name "scratch"
+            url "$buildDir/repo"
+        }
+    }
 }
 
 task install(dependsOn: publishToMavenLocal)
+
+if (file('local.gradle').exists()) {
+    apply from: 'local.gradle'
+}
