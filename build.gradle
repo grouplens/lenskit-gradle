@@ -1,0 +1,21 @@
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+
+group = 'org.grouplens.lenskit'
+version = '0.1-SNAPSHOT'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // make sure the artifact is set, irrespective of directory name
+            artifactId 'lenskit-gradle'
+            
+            from components.java
+        }
+    }
+}
