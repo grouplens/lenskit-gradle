@@ -41,7 +41,7 @@ artifacts {
 signing {
     signatories = new GnuPGSignatoryProvider()
     required {
-        !version.endsWith('SNAPSHOT') && org.grouplens.lenskit.gradle.taskGraph.hasTask('uploadArchives')
+        !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask('uploadArchives')
     }
     sign configurations.archives
 }
