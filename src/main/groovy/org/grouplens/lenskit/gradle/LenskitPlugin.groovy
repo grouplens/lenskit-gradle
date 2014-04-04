@@ -18,17 +18,25 @@ public class LenskitPlugin implements Plugin<Project> {
     private static final Logger logger = LoggerFactory.getLogger(LenskitPlugin.class);
 
     public void apply(Project project) {
-        project.getExtensions().create("lenskit", LenskitExtension.class);
-        for (Map.Entry<String,?> prop: project.getProperties().entrySet()) {
-            if (prop.getKey().startsWith("lenskit.")) {
+        def lenskit = project.extensions.create("lenskit", LenskitExtension)
+
+        for (prop in project.properties.entrySet()) {
+            if (prop.key.startsWith("lenskit.")) {
                 try {
-                    InvokerHelper.setProperty(project.getExtensions().getByName("lenskit"),
-                                              prop.getKey().substring(8),
-                                              prop.getValue());
+                    lenskit.setProperty(prop.key.substring(8), prop.value)
                     logger.info("set property {}", prop.getKey());
                 } catch (MissingPropertyException e) {
-                    logger.debug("no property {}", prop.getKey());
+                    logger.warning("unrecognized property {}", prop.getKey());
                 }
+            }
+        }
+
+        project.tasks.withType(LenskitEval) { LenskitEval task ->
+            task.conventionMapping.threadCount = {
+                lenskit.threadCount
+            }
+            task.conventionMapping.maxMemory = {
+                lenskit.maxMemory
             }
         }
     }
