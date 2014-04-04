@@ -1,5 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath 'net.elehack.gradle:gradle-util:0.1-SNAPSHOT'
+    }
+}
+
+import net.elehack.gradle.util.*
+
 apply plugin: 'groovy'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 group = 'org.grouplens.lenskit'
 version = '0.1-SNAPSHOT'
@@ -9,24 +24,79 @@ dependencies {
     compile localGroovy()
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            // make sure the artifact is set, irrespective of directory name
-            artifactId 'lenskit-gradle'
-            
-            from components.java
-        }
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+signing {
+    signatories = new GnuPGSignatoryProvider()
+    required {
+        !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask('uploadArchives')
     }
-    repositories {
-        maven {
-            name "scratch"
-            url "$buildDir/repo"
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        def user = System.getenv('DEPLOY_USER') ?: project.properties.get('deploy.user', null)
+        def password = System.getenv('DEPLOY_PASSWORD') ?: project.properties.get('deploy.password', null)
+
+        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+            if (user != null && password != null) {
+                authentication(userName: user, password: password)
+            }
+        }
+
+        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+            if (user != null && password != null) {
+                authentication(userName: user, password: password)
+            }
+        }
+
+        beforeDeployment { deploy ->
+            signing.signPom(deploy)
+        }
+
+        pom.project {
+            name 'LensKit Gradle plugin'
+            packaging 'jar'
+            // optionally artifactId can be defined here
+            description 'Gradle plugin for running LensKit evaluations.'
+            url 'http://github.com/grouplens/lenskit-gradle'
+
+            scm {
+                connection 'scm:git:http://github.com/grouplens/lenskit-gradle.git'
+                developerConnection 'scm:git:git@github.com:grouplens/lenskit-gradle.git'
+                url 'http://github.com/grouplens/lenskit-gradle'
+            }
+
+            licenses {
+                license {
+                    name 'GNU Lesser General Public License version 2.1 or later'
+                    url 'https://www.gnu.org/licenses/lgpl-2.1.txt'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'ekstrand'
+                    name 'Michael Ekstrand'
+                    email 'ekstrand@cs.umn.edu'
+                }
+            }
         }
     }
 }
-
-task install(dependsOn: publishToMavenLocal)
 
 if (file('local.gradle').exists()) {
     apply from: 'local.gradle'
