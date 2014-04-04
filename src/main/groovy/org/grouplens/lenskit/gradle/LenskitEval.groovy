@@ -1,18 +1,16 @@
-package org.grouplens.lenskit.gradle;
+package org.grouplens.lenskit.gradle
 
-import com.google.common.collect.FluentIterable;
-import org.gradle.api.Nullable;
+import com.google.common.collect.FluentIterable
+import org.gradle.api.Nullable
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection;
-import org.gradle.api.internal.ConventionTask;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.TaskAction;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.ConventionTask
+import org.gradle.api.internal.file.FileResolver
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.TaskAction
+import org.gradle.process.JavaExecSpec
+import org.gradle.process.internal.DefaultJavaExecAction
+import org.gradle.util.ConfigureUtil
 
 /**
  * Task to run LensKit evaluations.
@@ -24,11 +22,12 @@ public class LenskitEval extends ConventionTask {
     private List<String> targets = new ArrayList<String>()
     private Map<String,Object> properties = new HashMap<String, Object>()
     def int threadCount
-    def FileCollection classpath
     def String maxMemory
-    def Closure configBlock
+    final def JavaExecSpec invoker
 
-    public LenskitEval() {}
+    public LenskitEval() {
+        invoker = new DefaultJavaExecAction(services.get(FileResolver))
+    }
 
     /**
      * Set the evaluation script to run.
@@ -114,16 +113,24 @@ public class LenskitEval extends ConventionTask {
         setThreadCount(tc);
     }
 
+    public FileCollection getClasspath() {
+        return invoker.classpath
+    }
+
+    public void setClasspath(FileCollection cp) {
+        invoker.classpath = cp
+    }
+
     public void classpath(FileCollection cp) {
-        classpath = cp
+        invoker.classpath = cp
     }
 
     public void maxMemory(String mm) {
         maxMemory = mm
     }
 
-    public void settings(Closure block) {
-        settings = block
+    public void invoker(Closure block) {
+        ConfigureUtil.configure(block, invoker)
     }
 
     /**
@@ -138,8 +145,8 @@ public class LenskitEval extends ConventionTask {
 
     @TaskAction
     public void exec() {
-        project.javaexec {
-            main 'org.grouplens.lenskit.cli.Main'
+        invoker {
+            main = 'org.grouplens.lenskit.cli.Main'
             args 'eval'
             args "-j$threadCount"
             for (prop in properties) {
@@ -150,8 +157,9 @@ public class LenskitEval extends ConventionTask {
             }
             args targets
             if (maxMemory != null) {
-                maxHeapSize maxMemory
+                maxHeapSize = maxMemory
             }
         }
+        invoker.execute()
     }
 }
