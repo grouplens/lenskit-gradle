@@ -20,7 +20,7 @@ import org.gradle.util.ConfigureUtil
 public class LenskitEval extends ConventionTask {
     private Object script = "eval.groovy"
     private List<String> targets = new ArrayList<String>()
-    private Map<String,Object> properties = new HashMap<String, Object>()
+    private Map<String,Object> lkProps = new HashMap<String, Object>()
     def int threadCount
     def String maxMemory
     final def JavaExecSpec invoker
@@ -83,16 +83,16 @@ public class LenskitEval extends ConventionTask {
      * Get the map of properties to be passed to the script.
      * @return The map of the properties to be passed to the script.
      */
-    public Map<String, Object> getProperties() {
-        return properties;
+    public Map<String, Object> getLenskitProperties() {
+        return lkProps;
     }
 
     /**
      * Set the map of properties to be passed to the script.
      * @param props The map of properties to be passed.
      */
-    public void setProperties(Map<String, Object> props) {
-        properties = new HashMap<String, Object>(props);
+    public void setLenskitProperties(Map<String, Object> props) {
+        lkProps = new HashMap<String, Object>(props);
     }
 
     /**
@@ -100,8 +100,8 @@ public class LenskitEval extends ConventionTask {
      * @param props A map of properties to set.  These properties are set in addition to any
      *              already-set properties, overriding previously-set properties with the same value.
      */
-    public void properties(Map<String, Object> props) {
-        properties.putAll(props);
+    public void lenskitProperties(Map<String, Object> props) {
+        lkProps.putAll(props);
     }
 
     @Nullable
