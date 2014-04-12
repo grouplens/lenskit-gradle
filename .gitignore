@@ -2,6 +2,7 @@
 /build
 
 local.gradle
+gradle.properties
 *.iml
 /.idea
 /.idea_modules
