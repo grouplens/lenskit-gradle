@@ -20,14 +20,12 @@ public class LenskitPlugin implements Plugin<Project> {
     public void apply(Project project) {
         def lenskit = project.extensions.create("lenskit", LenskitExtension)
 
-        for (prop in project.properties.entrySet()) {
-            if (prop.key.startsWith("lenskit.")) {
-                try {
-                    logger.info("setting property {} to {}", prop.key, prop.value);
-                    lenskit.setProperty(prop.key.substring(8), prop.value)
-                } catch (MissingPropertyException e) {
-                    logger.warning("unrecognized property {}", prop.getKey());
-                }
+        for (prop in lenskit.metaClass.properties) {
+            def prjProp = "lenskit.$prop.name"
+            if (project.hasProperty(prjProp)) {
+                def val = project.getProperty(prjProp)
+                logger.info 'setting property {} to {}', prjProp, val
+                prop.setProperty(lenskit, project.getProperty(prjProp))
             }
         }
 
