@@ -23,8 +23,8 @@ public class LenskitPlugin implements Plugin<Project> {
         for (prop in project.properties.entrySet()) {
             if (prop.key.startsWith("lenskit.")) {
                 try {
+                    logger.info("setting property {} to {}", prop.key, prop.value);
                     lenskit.setProperty(prop.key.substring(8), prop.value)
-                    logger.info("set property {}", prop.getKey());
                 } catch (MissingPropertyException e) {
                     logger.warning("unrecognized property {}", prop.getKey());
                 }
