@@ -51,15 +51,21 @@ uploadArchives {
         def user = System.getenv('DEPLOY_USER') ?: project.properties.get('deploy.user', null)
         def password = System.getenv('DEPLOY_PASSWORD') ?: project.properties.get('deploy.password', null)
 
-        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+        def deployUrl = project.properties.get('deploy.url', null)
+        if (deployUrl != null) {
+            deployUrl = rootProject.uri(deployUrl)
+        }
+        repository(url: deployUrl ?: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
             if (user != null && password != null) {
                 authentication(userName: user, password: password)
             }
         }
 
-        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-            if (user != null && password != null) {
-                authentication(userName: user, password: password)
+        if (deployUrl == null) {
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                if (user != null && password != null) {
+                    authentication(userName: user, password: password)
+                }
             }
         }
 
