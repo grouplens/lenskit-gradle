@@ -1,13 +1,9 @@
-package org.grouplens.lenskit.gradle;
+package org.grouplens.lenskit.gradle
 
-import groovy.lang.MissingPropertyException;
-import org.codehaus.groovy.runtime.InvokerHelper;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Plugin for LensKit evaluations.
@@ -25,7 +21,10 @@ public class LenskitPlugin implements Plugin<Project> {
             if (project.hasProperty(prjProp)) {
                 def val = project.getProperty(prjProp)
                 logger.info 'setting property {} to {}', prjProp, val
-                prop.setProperty(lenskit, project.getProperty(prjProp))
+                if (prop.type != String) {
+                    val = prop.type.metaClass.invokeConstructor(val)
+                }
+                prop.setProperty(lenskit, val)
             }
         }
 

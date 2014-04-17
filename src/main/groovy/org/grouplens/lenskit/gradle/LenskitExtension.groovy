@@ -1,13 +1,10 @@
-package org.grouplens.lenskit.gradle;
-
-import org.gradle.api.Project;
-
+package org.grouplens.lenskit.gradle
 /**
  * Extension for configuring LensKit.
  * @author <a href="http://www.grouplens.org">GroupLens Research</a>
  */
 public class LenskitExtension {
-    def int threadCount
+    def Integer threadCount = 0
     def String maxMemory
 
     public void threadCount(int tc) {

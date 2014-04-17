@@ -145,19 +145,26 @@ public class LenskitEval extends ConventionTask {
 
     @TaskAction
     public void exec() {
+        logger.info 'Running evaluation {}', scriptFile
+        // FIXME It isn't obvious why the thread count has to be this way
+        // It has to do with convention mappings, but we need to be clearer
+        logger.info 'Thread count: {}', getThreadCount()
+        logger.info 'Max memory: {}', maxMemory
+        // grab reference to make scope clearer
+        def lke = this
         invoker {
             main = 'org.grouplens.lenskit.cli.Main'
             args 'eval'
-            args "-j$threadCount"
-            for (prop in properties) {
+            args "-j$lke.threadCount"
+            for (prop in lke.lenskitProperties) {
                 args "-D$prop.key=$prop.value"
             }
-            if (scriptFile != null) {
-                args '-f', scriptFile
+            if (lke.scriptFile != null) {
+                args '-f', lke.scriptFile
             }
-            args targets
-            if (maxMemory != null) {
-                maxHeapSize = maxMemory
+            args lke.targets
+            if (lke.maxMemory != null) {
+                maxHeapSize = lke.maxMemory
             }
         }
         invoker.execute()
