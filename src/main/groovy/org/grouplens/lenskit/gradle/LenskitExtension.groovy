@@ -6,6 +6,7 @@ package org.grouplens.lenskit.gradle
 public class LenskitExtension {
     def Integer threadCount = 0
     def String maxMemory
+    def String version = 'LATEST'
 
     public void threadCount(int tc) {
         setThreadCount(tc);
@@ -13,5 +14,9 @@ public class LenskitExtension {
 
     public void maxMemory(String mm) {
         maxMemory = mm
+    }
+
+    public void version(String v) {
+        version = v
     }
 }

@@ -27,6 +27,7 @@ public class LenskitEval extends ConventionTask {
 
     public LenskitEval() {
         invoker = new DefaultJavaExecAction(services.get(FileResolver))
+        invoker.classpath = project.configurations.getByName('lenskit')
     }
 
     /**
