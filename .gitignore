@@ -4,5 +4,7 @@
 local.gradle
 gradle.properties
 *.iml
+*.ipr
+*.iws
 /.idea
 /.idea_modules
